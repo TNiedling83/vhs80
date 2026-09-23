@@ -24,7 +24,8 @@
   .p button.ok { background: var(--green); }
   ol { padding-left: 20px; margin: 0; } li { margin-bottom: 8px; }
   .apps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .apps div { background: #fff; border-radius: 14px; padding: 12px; font-size: 14px; color: var(--muted); }
+  .apps a { display: block; text-decoration: none; background: #fff; border-radius: 14px; padding: 12px; font-size: 14px; color: var(--muted); border: 2px solid transparent; box-shadow: 0 4px 14px rgba(0,40,90,.08); }
+  .apps a:active { border-color: var(--gold); }
   .apps strong { display: block; color: var(--navy); font-size: 16px; }
   footer { text-align: center; font-size: 12px; color: var(--muted); padding: 10px 16px 30px; }
 </style>
@@ -52,11 +53,12 @@
 
   <h2>📱 Kostenlos ausprobieren</h2>
   <div class="apps">
-    <div><strong>ChatGPT</strong>OpenAI, USA</div>
-    <div><strong>Claude</strong>Anthropic, USA</div>
-    <div><strong>Gemini</strong>Google, USA</div>
-    <div><strong>Le Chat</strong>Mistral, Frankreich</div>
+    <a href="https://chatgpt.com" target="_blank" rel="noopener"><strong>ChatGPT ↗</strong>OpenAI, USA</a>
+    <a href="https://claude.ai" target="_blank" rel="noopener"><strong>Claude ↗</strong>Anthropic, USA</a>
+    <a href="https://gemini.google.com" target="_blank" rel="noopener"><strong>Gemini ↗</strong>Google, USA</a>
+    <a href="https://chat.mistral.ai" target="_blank" rel="noopener"><strong>Le Chat ↗</strong>Mistral, Frankreich</a>
   </div>
+  <p class="lead" style="margin-top:10px;font-size:14px">Antippen öffnet die Seite. Alle gibt es auch als App im App Store und bei Google Play.</p>
   <p class="lead" style="margin-top:12px;font-size:14px">Tipp: In den Einstellungen nachsehen, ob Ihre Eingaben zum Training verwendet werden dürfen, und das bei Bedarf abschalten.</p>
 
   <h2>🔐 Gegen den Enkeltrick mit KI-Stimme</h2>
