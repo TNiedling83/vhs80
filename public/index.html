@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00285A">
+<title>Mitmachen · 80 Jahre VHS Lingen</title>
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    --navy: #00285A; --navy-2: #0B3A78; --gold: #F2B705; --gold-2: #C8961E;
+    --red: #E0000F; --blue: #1E73AE; --ink: #0B1B33; --muted: #5B6B82; --bg: #F4F6FA;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { background: #fff; padding: 14px 16px 10px; text-align: center; border-bottom: 4px solid var(--gold); }
+  header img { width: 100%; max-width: 330px; height: auto; display: block; margin: 0 auto; }
+  main { padding: 22px 16px 40px; max-width: 520px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 20px; padding: 22px 18px; box-shadow: 0 8px 26px rgba(0,40,90,.10); }
+  .kicker { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-2); margin: 0 0 8px; }
+  h1 { font-size: 24px; line-height: 1.2; margin: 0 0 6px; color: var(--navy); }
+  .hint { margin: 0 0 18px; color: var(--muted); font-size: 15px; line-height: 1.4; }
+  .opts { display: grid; gap: 12px; }
+  .opt { appearance: none; width: 100%; border: 2px solid #D9E1EC; background: #fff; color: var(--ink);
+    border-radius: 16px; padding: 18px 16px; font-size: 19px; font-weight: 700; text-align: left; cursor: pointer;
+    display: flex; align-items: center; gap: 12px; transition: transform .1s, border-color .15s, background .15s; }
+  .opt:active { transform: scale(.98); }
+  .opt i { flex: 0 0 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-style: normal;
+    color: #fff; font-size: 16px; font-weight: 800; }
+  .opt.is-mine { border-color: var(--navy); background: #EAF0F8; }
+  .row { display: flex; gap: 10px; }
+  input[type=text] { flex: 1; min-width: 0; font-size: 19px; padding: 16px; border-radius: 14px; border: 2px solid #D9E1EC; }
+  input[type=text]:focus { outline: none; border-color: var(--navy); }
+  .send { appearance: none; border: 0; border-radius: 14px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 800; padding: 0 18px; }
+  .done { text-align: center; padding: 30px 10px 10px; }
+  .done .big { font-size: 54px; }
+  .done h1 { margin-top: 8px; }
+  .wait { text-align: center; padding: 26px 8px; }
+  .dots { display: flex; gap: 8px; justify-content: center; margin: 14px 0 4px; }
+  .dots span { width: 14px; height: 14px; border-radius: 50%; animation: hop 1.2s infinite ease-in-out; }
+  .dots span:nth-child(1) { background: var(--navy); }
+  .dots span:nth-child(2) { background: var(--gold); animation-delay: .15s; }
+  .dots span:nth-child(3) { background: var(--red); animation-delay: .3s; }
+  .dots span:nth-child(4) { background: var(--blue); animation-delay: .45s; }
+  @keyframes hop { 0%, 80%, 100% { transform: translateY(0); opacity: .6; } 40% { transform: translateY(-10px); opacity: 1; } }
+  .again { margin-top: 16px; background: none; border: 0; color: var(--blue); font-size: 15px; font-weight: 700; text-decoration: underline; }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 0 16px 30px; line-height: 1.5; }
+  .err { color: var(--red); font-weight: 700; margin-top: 12px; min-height: 1em; }
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt="80 Jahre VHS Lingen"></header>
+<main><div class="card" id="app"><div class="wait"><div class="dots"><span></span><span></span><span></span><span></span></div><p class="hint">Verbinde …</p></div></div></main>
+<footer>Anonyme Abstimmung · keine Anmeldung · es werden keine persönlichen Daten gespeichert.<br>Vortrag „Einstieg in die KI-Transformation“ · 02.10.2026</footer>
+<script>
+(function () {
+  var COLORS = ["#00285A", "#E0000F", "#1E73AE", "#C8961E", "#EB6A0A", "#2E8B57", "#6B4FA0", "#5B6B82"];
+  var app = document.getElementById("app");
+  var voter;
+  try { voter = localStorage.getItem("vhs80voter"); } catch (e) {}
+  if (!voter) { voter = Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem("vhs80voter", voter); } catch (e) {} }
+  var shownKey = "";
+
+  function voted(qid) { try { return localStorage.getItem("vhs80v_" + qid); } catch (e) { return null; } }
+  function markVoted(qid, v) { try { localStorage.setItem("vhs80v_" + qid, v); } catch (e) {} }
+  function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+  function waiting() {
+    app.innerHTML = '<div class="wait"><p class="kicker">Schön, dass Sie da sind</p><h1>Gleich geht es los</h1>' +
+      '<div class="dots"><span></span><span></span><span></span><span></span></div>' +
+      '<p class="hint">Sobald vorne eine Frage kommt, erscheint sie hier automatisch. Lassen Sie diese Seite einfach offen.</p></div>';
+  }
+  function thanks(q, mine) {
+    app.innerHTML = '<div class="done"><div class="big">🎉</div><h1>Danke!</h1>' +
+      '<p class="hint">Ihre Antwort' + (mine ? ' „' + esc(mine) + '“' : '') + ' ist angekommen. Das Ergebnis sehen Sie vorne auf der Leinwand.</p>' +
+      '<button class="again" id="again">Antwort ändern</button></div>';
+    document.getElementById("again").onclick = function () { markVoted(q.qid, ""); shownKey = ""; draw(q); };
+  }
+  function post(body) {
+    return fetch("api/vote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); });
+  }
+  function draw(q) {
+    var v = voted(q.qid);
+    if (v) return thanks(q, v);
+    var html = '<p class="kicker">Ihre Meinung ist gefragt</p><h1>' + esc(q.title) + '</h1>' +
+      (q.hint ? '<p class="hint">' + esc(q.hint) + '</p>' : '<p class="hint">Tippen Sie auf Ihre Antwort.</p>');
+    if (q.type === "text") {
+      var lang = (q.max || 32) > 40;
+      html += '<form class="row" id="f"' + (lang ? ' style="flex-direction:column"' : '') + '>' +
+        (lang ? '<textarea id="t" maxlength="' + q.max + '" rows="3" placeholder="Ihre Frage …" style="font-size:18px;padding:14px;border-radius:14px;border:2px solid #D9E1EC;font-family:inherit"></textarea><button class="send" style="padding:14px">Senden</button>'
+              : '<input type="text" id="t" maxlength="' + (q.max || 32) + '" placeholder="Ein Wort oder kurz …" autocomplete="off" enterkeyhint="send"><button class="send">Senden</button>') +
+        '</form>';
+    } else {
+      html += '<div class="opts">' + q.options.map(function (o, i) {
+        return '<button class="opt" data-i="' + i + '"><i style="background:' + COLORS[i % COLORS.length] + '">' + String.fromCharCode(65 + i) + '</i>' + esc(o) + '</button>';
+      }).join("") + '</div>';
+    }
+    html += '<div class="err" id="err"></div>';
+    app.innerHTML = html;
+    if (q.type === "text") {
+      document.getElementById("f").onsubmit = function (e) {
+        e.preventDefault();
+        var t = document.getElementById("t").value.trim();
+        if (!t) return;
+        post({ voter: voter, qid: q.qid, text: t }).then(function (r) {
+          if (r.ok) { markVoted(q.qid, t); thanks(q, t); } else document.getElementById("err").textContent = "Die Frage ist schon geschlossen.";
+        }).catch(function () { document.getElementById("err").textContent = "Keine Verbindung – bitte nochmal."; });
+      };
+    } else {
+      Array.prototype.forEach.call(app.querySelectorAll(".opt"), function (b) {
+        b.onclick = function () {
+          b.classList.add("is-mine");
+          var label = q.options[+b.dataset.i];
+          post({ voter: voter, qid: q.qid, option: +b.dataset.i }).then(function (r) {
+            if (r.ok) { markVoted(q.qid, label); thanks(q, label); } else document.getElementById("err").textContent = "Die Frage ist schon geschlossen.";
+          }).catch(function () { b.classList.remove("is-mine"); document.getElementById("err").textContent = "Keine Verbindung – bitte nochmal."; });
+        };
+      });
+    }
+  }
+  function tick() {
+    fetch("api/current", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
+      var key = d.open ? d.question.qid + "|" + d.question.title + "|" + d.question.options.join("|") : "-";
+      if (key === shownKey) return;
+      if (document.activeElement && document.activeElement.id === "t") return; // nicht beim Tippen umschalten
+      shownKey = key;
+      if (d.open) draw(d.question); else waiting();
+    }).catch(function () {}).then(function () { setTimeout(tick, 1500); });
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
